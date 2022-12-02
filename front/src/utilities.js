@@ -1,45 +1,27 @@
 import userData from './data/users.json'
+import axios from 'axios'
 
-const fs = require('fs')
-
-
-const loadFile = (path) => {
-
-}
-
-
-const handleSaveToPC = (jsonData,filename) => {
-    const fileData = JSON.stringify(jsonData);
-    const blob = new Blob([fileData], {type: "text/plain"});
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.download = `${filename}.json`;
-    link.href = url;
-    link.click();
-}
+const host = "https://127.0.0.1:8000"
 
 
 export function addUser(username, password, email){
-    userData.data.push({
-        username: username,
-        password: password,
-        email: email
-    });
-    fs.writeFileSync('./data/users.json', JSON.stringify(userData.data));
+
+    axios.post(`${host}/registerUser`, {username: username, password: password, email:email})
+        .then(response => {
+            if(response.status === 200){
+                return true;
+            }
+            return false;
+        });
 }
 
 export function checkUser(username, password){
-    let isRegistred = false
-    userData.data.map((user) => {
-        console.log(user.username)
-        if (user.username === username && user.password === password){
-            isRegistred = true
-        }
-    })
-
-    if(isRegistred){
-        return true;
-    }
-    return false;
-
+    axios.post(`${host}/auth`, {username: username, password: password})
+        .then(response => {
+            let data = JSON.parse(response.data);
+            if(data.isRegistred === true){
+                return true;
+            }
+            return false
+        });
 }
